@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"time"
-
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/bson"
@@ -19,6 +18,7 @@ type User struct {
 	Username        string		`bson:"username"`
 	HashedPassword  []byte  	`bson:"hashedPassword"`
 	CreatedAt		time.Time	`bson:"createdAt"`
+	SessionValue	string		`bson:"sessionValue"`
 }
 
 func Init() error{
@@ -39,60 +39,52 @@ func Init() error{
 }
 
 func InsertNewUser(email string, username string, hashedPassword []byte) error{
-	isEmailBusy, err := IsEmailExists(email)
-	if err != nil {
+	filter := bson.D{
+		{"$or",
+		   bson.A{
+			bson.D{{"email", email}},
+			bson.D{{"email", username}},
+		   },
+		},
+	 }
+	cursor := users.FindOne(ctx, filter)
+	_, err:= cursor.Raw()
+	if err == mongo.ErrNoDocuments {
+		newUser := User {
+			Email: email,
+			Username: username,
+			HashedPassword: hashedPassword, 
+			CreatedAt: time.Now() }
+		_, err = users.InsertOne(ctx, newUser)
+		if err != nil {
+			return err
+		}
+		return nil
+	} else if err != nil {
 		return err
+	} else {
+		return errors.New("user already exists")
 	}
-	if isEmailBusy {
-		return errors.New("email already exists")
+	
+}
+
+func GetPasswordByEmail(email string) ([]byte, error){
+	filter := bson.D{{"email", email}}
+	cursor := users.FindOne(ctx, filter)
+	result, err := cursor.Raw()
+	if err != nil {
+		return nil, err
 	}
 
-	isUsernameBusy, err := IsUsernameExists(username)
-	if err != nil {
-		return err
-	}
-	if isUsernameBusy {
-		return errors.New("username already exists")
-	}
+	return result.Lookup("hashedPassword").Value, nil
+}
 
-	newUser := User {
-		Email: email,
-		Username: username,
-		HashedPassword: hashedPassword, 
-		CreatedAt: time.Now() }
-	_, err = users.InsertOne(ctx, newUser)
+func SetUserSessionValue(email string, sessionValue string) (error){
+	filter := bson.D{{"email", email}}
+	update := bson.D{{"sessionValue", sessionValue}}
+	_, err := users.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return err
 	}
 	return nil
-}
-
-func IsEmailExists(email string) (bool, error) {
-	filter := bson.D{{"email", email}}
-	cursor := users.FindOne(ctx, filter)
-	_, err:= cursor.Raw()
-	if err == mongo.ErrNoDocuments {
-		return false, nil
-	} else if err != nil {
-		return false, err
-	} else {
-		return true, nil
-	}
-}
-
-func IsUsernameExists(username string) (bool, error) {
-	filter := bson.D{{"username", username}}
-	cursor := users.FindOne(ctx, filter)
-	_, err:= cursor.Raw()
-	if err == mongo.ErrNoDocuments {
-		return false, nil
-	} else if err != nil {
-		return false, err
-	} else {
-		return true, nil
-	}
-}
-
-func GetUser(email string) {
-
 }
