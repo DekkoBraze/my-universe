@@ -6,6 +6,7 @@ require go.mongodb.org/mongo-driver v1.13.1
 
 require (
 	github.com/golang/snappy v0.0.1 // indirect
+	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/gorilla/sessions v1.2.2 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect

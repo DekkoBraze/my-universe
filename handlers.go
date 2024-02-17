@@ -7,6 +7,7 @@ import (
 	"my-universe/database"
 	"my-universe/authorization"
 	"encoding/base64"
+	"github.com/gorilla/mux"
 )
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
@@ -70,4 +71,30 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		tmpl, _ := template.ParseFiles("templates/login.html")
 		tmpl.Execute(w, nil)
 	}
+}
+
+func profileHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	username := vars["username"]
+	profileBson, err := database.GetProfile(username)
+	if err != nil {
+		log.Print("profileHandler: ", err)
+	}
+	
+	
+	type TemplateData struct{
+		Username        string
+		Age				string
+		Country			string
+		Status			string
+		Description		string
+	}
+
+	tmpl, _ := template.ParseFiles("templates/profile.html")
+	templateData := TemplateData{ Username: profileBson.Lookup("username").StringValue(), 
+								  Age: profileBson.Lookup("age").StringValue(), 
+								  Country: profileBson.Lookup("country").StringValue(), 
+								  Status: profileBson.Lookup("status").StringValue(),
+								  Description: profileBson.Lookup("description").StringValue() }
+	tmpl.Execute(w, templateData)
 }

@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"my-universe/database"
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -12,9 +13,13 @@ func main() {
 		log.Fatal("Init: ", err)
 	}
 
-    http.HandleFunc("/", indexHandler)
-	http.HandleFunc("/registration", registrationHandler)
-	http.HandleFunc("/login", loginHandler)
+	router := mux.NewRouter()
+
+    router.HandleFunc("/", indexHandler)
+	router.HandleFunc("/registration", registrationHandler)
+	router.HandleFunc("/login", loginHandler)
+	router.HandleFunc("/profile/{username}", profileHandler)
+	http.Handle("/", router)
 
 	stylesServer := http.FileServer(http.Dir("./styles"))
 	http.Handle("/styles/", http.StripPrefix("/styles/", neuter(stylesServer)))
