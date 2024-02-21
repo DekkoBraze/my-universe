@@ -21,10 +21,6 @@ type User struct {
 	HashedPassword  []byte  	`bson:"hashedPassword"`
 	CreatedAt		time.Time	`bson:"createdAt"`
 	SessionValue	string		`bson:"sessionValue"`
-}
-
-type Profile struct {
-	Username        string  	`bson:"username"`
 	Age				string		`bson:"age"`
 	Country			string		`bson:"country"`
 	Status			string		`bson:"status"`
@@ -65,18 +61,15 @@ func InsertNewUser(email string, username string, hashedPassword []byte) error{
 			Email: email,
 			Username: username,
 			HashedPassword: hashedPassword, 
-			CreatedAt: time.Now() }
-		_, err = users.InsertOne(ctx, newUser)
-		if err != nil {
-			return err
-		}
-		newProfile := Profile {
-			Username: username,
+			CreatedAt: time.Now(),
 			Age: "",
 			Country: "", 
 			Status: "", 
 			Description: "" }
-		_, err = profiles.InsertOne(ctx, newProfile)
+		_, err = users.InsertOne(ctx, newUser)
+		if err != nil {
+			return err
+		}
 		if err != nil {
 			return err
 		}
@@ -102,7 +95,7 @@ func GetPasswordByEmail(email string) ([]byte, error){
 
 func SetUserSessionValue(email string, sessionValue string) (error){
 	filter := bson.D{{"email", email}}
-	update := bson.D{{"sessionValue", sessionValue}}
+	update := bson.D{{"$set", bson.D{{"sessionValue", sessionValue}}}}
 	_, err := users.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return err
@@ -110,9 +103,20 @@ func SetUserSessionValue(email string, sessionValue string) (error){
 	return nil
 }
 
-func GetProfile(username string) (bson.Raw, error){
+func GetProfileByUsername(username string) (bson.Raw, error){
 	filter := bson.D{{"username", username}}
-	cursor := profiles.FindOne(ctx, filter)
+	cursor := users.FindOne(ctx, filter)
+	result, err := cursor.Raw()
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func GetProfileBySessionValue(value string) (bson.Raw, error){
+	filter := bson.D{{"sessionValue", value}}
+	cursor := users.FindOne(ctx, filter)
 	result, err := cursor.Raw()
 	if err != nil {
 		return nil, err

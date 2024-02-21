@@ -14,18 +14,21 @@ func main() {
 	}
 
 	router := mux.NewRouter()
-
+	
     router.HandleFunc("/", indexHandler)
-	router.HandleFunc("/registration", registrationHandler)
-	router.HandleFunc("/login", loginHandler)
-	router.HandleFunc("/profile/{username}", profileHandler)
+	router.HandleFunc("/signup", registrationHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/login", loginHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/profile/{username}", profileHandler).Methods("GET", "OPTIONS")
 	http.Handle("/", router)
 
 	stylesServer := http.FileServer(http.Dir("./styles"))
 	http.Handle("/styles/", http.StripPrefix("/styles/", neuter(stylesServer)))
 
-	err = http.ListenAndServe("localhost:9090", nil)
+	err = http.ListenAndServe(":8000", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
 }
+
+
+//Соединем фронт и бек логина, делаем редирект после регистрации, 
