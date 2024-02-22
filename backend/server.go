@@ -19,7 +19,7 @@ func main() {
 	router.HandleFunc("/signup", registrationHandler).Methods("POST", "OPTIONS")
 	router.HandleFunc("/login", loginHandler).Methods("POST", "OPTIONS")
 	router.HandleFunc("/profile/{username}", profileHandler).Methods("GET", "OPTIONS")
-	http.Handle("/", router)
+	http.Handle("/api", router)
 
 	stylesServer := http.FileServer(http.Dir("./styles"))
 	http.Handle("/styles/", http.StripPrefix("/styles/", neuter(stylesServer)))
@@ -30,5 +30,3 @@ func main() {
 	}
 }
 
-
-//Соединем фронт и бек логина, делаем редирект после регистрации, 
