@@ -14,9 +14,9 @@ function App() {
             <Navbar />
             <Routes>
                 <Route path="/" exact element={<Home />} />
-                <Route path="/profile/:username" element={<Profile />} />
-                <Route path="/signup" element={<SignUp />} />
-                <Route path="/login" element={<Login />} />
+                <Route path="/profile/:username/" element={<Profile />} />
+                <Route path="/signup/" element={<SignUp />} />
+                <Route path="/login/" element={<Login />} />
                 <Route path="*" element={<NotFound />} />
             </Routes>
         </div>

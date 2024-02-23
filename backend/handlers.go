@@ -1,23 +1,18 @@
 package main
 
 import (
-	"html/template"
 	"log"
 	"net/http"
 	"my-universe/database"
 	"my-universe/authorization"
-	"encoding/base64"
 	"github.com/gorilla/mux"
 	"encoding/json"
 )
 
-func indexHandler(w http.ResponseWriter, r *http.Request) {
-    tmpl, _ := template.ParseFiles("templates/index.html")
-    tmpl.Execute(w, nil)
-}
+var reactUrl = "http://localhost:3000"
 
 func registrationHandler(w http.ResponseWriter, r *http.Request) {	
-	w.Header().Set("Access-Control-Allow-Origin", "*")		
+	w.Header().Set("Access-Control-Allow-Origin", reactUrl)		
 	type RegistrationData struct{
 		Email        			string	`json:"email"`
 		Username				string  `json:"username"`
@@ -44,7 +39,7 @@ func registrationHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	w.Header().Set("Access-Control-Allow-Origin", reactUrl)
 	w.Header().Set("Content-Type", "application/json")
 
 	type LoginData struct{
@@ -62,13 +57,10 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 
 	email := data.Email
 	password := data.Password
-	err = authorization.Login(email, password)
+	encodedValue, err := authorization.Login(email, password)
 	if err != nil {
 		log.Print("loginHandler: ", err)
 	}
-
-	encodedValue := base64.StdEncoding.EncodeToString([]byte(email + " : my-universe"))
-	database.SetUserSessionValue(email, encodedValue)
 	
 	cookie := &http.Cookie{
 		Name: "my-universe",
@@ -76,23 +68,24 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		Path: "/", 
 		MaxAge: 86400,
 	}
+	http.SetCookie(w, cookie)
 
-	type AnswerLogin struct{
-		Username        string	`json:"username"`
+	type ResponseLogin struct{
+		Username	string	`json:"username"`
 	}
 
-	http.SetCookie(w, cookie)
 	userBson, err := database.GetProfileBySessionValue(encodedValue)
 	if err != nil {
 		log.Print("loginHandler: ", err)
 	}
+	
 	username := userBson.Lookup("username").StringValue()
-	answer := AnswerLogin{Username: username}
+	answer := ResponseLogin{Username: username}
 	json.NewEncoder(w).Encode(answer)
 }
 
 func profileHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	w.Header().Set("Access-Control-Allow-Origin", reactUrl)
 	vars := mux.Vars(r)
 	username := vars["username"]
 	profileBson, err := database.GetProfileByUsername(username)
@@ -100,19 +93,23 @@ func profileHandler(w http.ResponseWriter, r *http.Request) {
 		log.Print("profileHandler: ", err)
 	}
 	
-	type ProfileData struct{
-		Username        string	`json:"username"`
-		Age				string  `json:"age"`
-		Country			string	`json:"country"`
-		Status			string	`json:"status"`
-		Description		string	`json:"description"`
-	}
+	profileJson := profileFromBsonToJson(profileBson)
+	json.NewEncoder(w).Encode(profileJson)
+}
 
-	profileData := ProfileData{ Username: profileBson.Lookup("username").StringValue(), 
-								  Age: profileBson.Lookup("age").StringValue(), 
-								  Country: profileBson.Lookup("country").StringValue(), 
-								  Status: profileBson.Lookup("status").StringValue(),
-								  Description: profileBson.Lookup("description").StringValue() }
-
-	json.NewEncoder(w).Encode(profileData)
+func getCurrentUser(w http.ResponseWriter, r *http.Request) {
+	userFound := false
+	w.Header().Set("Access-Control-Allow-Origin", reactUrl)
+	for _, cookie := range r.Cookies() {
+    if cookie.Name == "my-universe" {
+		profileBson, err := database.GetProfileBySessionValue(cookie.Value)
+		if err != nil {
+			log.Print("profileHandler: ", err)
+		}
+		profileJson := profileFromBsonToJson(profileBson)
+		json.NewEncoder(w).Encode(profileJson)
+		userFound = true
+    }
+}
+	if (!userFound) {json.NewEncoder(w).Encode("USER_NOT_LOGGED")}
 }

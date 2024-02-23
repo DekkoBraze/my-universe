@@ -17,12 +17,16 @@ function Login() {
     function handleLogin(e) {
         e.preventDefault();
         
-        fetch('http://localhost:8000/login', {
+        fetch('/api/login', {
           method: 'POST',
           body: JSON.stringify(data),
         })
           .then((response) => response.json())
           .then((data) => {
+            var oneday = new Date()
+            oneday.setHours(oneday.getHours() + 24);
+            var profileData = {...data, timestamp: oneday}
+            localStorage.setItem("user", JSON.stringify(profileData))
             window.location.href = "profile/" + data.username
           })
           .catch((error) => {

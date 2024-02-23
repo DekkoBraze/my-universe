@@ -5,6 +5,7 @@ import (
 	//"github.com/gorilla/sessions"
 	"my-universe/database"
 	"golang.org/x/crypto/bcrypt"
+	"encoding/base64"
 )
 
 func Registration(email string, username string, password string, passwordVerification string) error{
@@ -25,17 +26,19 @@ func Registration(email string, username string, password string, passwordVerifi
 	}
 }
 
-func Login(email string, password string) error{
+func Login(email string, password string) (string, error){
 	hashedPassword, err := database.GetPasswordByEmail(email)
-	//hashedNewPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	err = bcrypt.CompareHashAndPassword(hashedPassword[5:], []byte(password))
 	if err != nil {
-		return errors.New("password dosent match")
+		return "", errors.New("password dosent match")
 	}
 
-	return nil
+	encodedValue := base64.StdEncoding.EncodeToString([]byte(email + " : my-universe"))
+	database.SetUserSessionValue(email, encodedValue)
+
+	return encodedValue, nil
 }

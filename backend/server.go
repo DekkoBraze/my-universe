@@ -14,15 +14,12 @@ func main() {
 	}
 
 	router := mux.NewRouter()
-	
-    router.HandleFunc("/", indexHandler)
-	router.HandleFunc("/signup", registrationHandler).Methods("POST", "OPTIONS")
-	router.HandleFunc("/login", loginHandler).Methods("POST", "OPTIONS")
-	router.HandleFunc("/profile/{username}", profileHandler).Methods("GET", "OPTIONS")
-	http.Handle("/api", router)
-
-	stylesServer := http.FileServer(http.Dir("./styles"))
-	http.Handle("/styles/", http.StripPrefix("/styles/", neuter(stylesServer)))
+	subrouter := router.PathPrefix("/api/").Subrouter()
+	subrouter.HandleFunc("/signup", registrationHandler).Methods("POST", "OPTIONS")
+	subrouter.HandleFunc("/login", loginHandler).Methods("POST", "OPTIONS")
+	subrouter.HandleFunc("/getUser", getCurrentUser).Methods("GET", "OPTIONS")
+	subrouter.HandleFunc("/profile/{username}", profileHandler).Methods("GET", "OPTIONS")
+	http.Handle("/", router)
 
 	err = http.ListenAndServe(":8000", nil)
 	if err != nil {

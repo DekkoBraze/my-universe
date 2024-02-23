@@ -22,13 +22,12 @@ function SignUp() {
 
     function handlePasswordVerificationChange(e) {
         setData({...data, passwordVerification: e.target.value})
-        console.log(JSON.stringify(data))
     }
 
     function handleSignUp(e) {
         e.preventDefault();
 
-        fetch('http://localhost:8000/signup', {
+        fetch('/api/signup', {
           method: 'POST',
           body: JSON.stringify(data),
           mode: 'no-cors',
