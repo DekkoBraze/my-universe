@@ -2,15 +2,13 @@ package authorization
 
 import (
 	"errors"
-	//"github.com/gorilla/sessions"
 	"my-universe/database"
 	"golang.org/x/crypto/bcrypt"
 	"encoding/base64"
 )
 
-func Registration(email string, username string, password string, passwordVerification string) error{
-	if password == passwordVerification {
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+func Registration(email string, username string, password string) error{
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
@@ -21,9 +19,6 @@ func Registration(email string, username string, password string, passwordVerifi
 	}
 	
 	return nil
-	} else {
-		return errors.New("password dosen't match") 
-	}
 }
 
 func Login(email string, password string) (string, error){

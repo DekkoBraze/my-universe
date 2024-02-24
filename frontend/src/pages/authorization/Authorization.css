@@ -1,0 +1,13 @@
+.validationError {
+    text-align: center;
+    display: block;
+    color: red;
+    font-size: 15px;
+}
+
+.authorizationForm label {
+    display: block;
+    align-items: center;
+    margin: 5px;
+}
+

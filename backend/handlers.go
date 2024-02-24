@@ -12,12 +12,12 @@ import (
 var reactUrl = "http://localhost:3000"
 
 func registrationHandler(w http.ResponseWriter, r *http.Request) {	
-	w.Header().Set("Access-Control-Allow-Origin", reactUrl)		
+	w.Header().Set("Access-Control-Allow-Origin", reactUrl)
+	w.Header().Set("Content-Type", "application/json")		
 	type RegistrationData struct{
 		Email        			string	`json:"email"`
 		Username				string  `json:"username"`
 		Password				string	`json:"password"`
-		PasswordVerification	string	`json:"passwordVerification"`
 	}
 
 	var data RegistrationData
@@ -30,11 +30,18 @@ func registrationHandler(w http.ResponseWriter, r *http.Request) {
 	email := data.Email
 	username := data.Username
 	password := data.Password
-	passwordVerification := data.PasswordVerification
+	
+	type Response struct{
+		Message        			string	`json:"message"`
+	}
 
-	err = authorization.Registration(email, username, password, passwordVerification)
+	err = authorization.Registration(email, username, password)
 	if err != nil {
-		log.Print("registrationHandler: ", err)
+		var response = Response{Message: err.Error()}
+		json.NewEncoder(w).Encode(response)
+	} else {
+		var response = Response{Message: "OK"}
+		json.NewEncoder(w).Encode(response)
 	}
 }
 
@@ -48,6 +55,11 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var data LoginData
+	
+	type Response struct{
+		Message        			string	`json:"message"`
+		Username				string	`json:"username"`
+	}
 
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&data)
@@ -59,29 +71,28 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	password := data.Password
 	encodedValue, err := authorization.Login(email, password)
 	if err != nil {
-		log.Print("loginHandler: ", err)
+		var response = Response{Message: err.Error()}
+		json.NewEncoder(w).Encode(response)
 	}
 	
-	cookie := &http.Cookie{
-		Name: "my-universe",
-		Value: encodedValue, 
-		Path: "/", 
-		MaxAge: 86400,
-	}
-	http.SetCookie(w, cookie)
-
-	type ResponseLogin struct{
-		Username	string	`json:"username"`
-	}
-
-	userBson, err := database.GetProfileBySessionValue(encodedValue)
-	if err != nil {
-		log.Print("loginHandler: ", err)
-	}
+	if encodedValue != "" {
+			cookie := &http.Cookie{
+			Name: "my-universe",
+			Value: encodedValue, 
+			Path: "/", 
+			MaxAge: 86400,
+		}
+		http.SetCookie(w, cookie)
 	
-	username := userBson.Lookup("username").StringValue()
-	answer := ResponseLogin{Username: username}
-	json.NewEncoder(w).Encode(answer)
+		userBson, err := database.GetProfileBySessionValue(encodedValue)
+		if err != nil {
+			log.Print("loginHandler: ", err)
+		}
+		
+		username := userBson.Lookup("username").StringValue()
+		answer := Response{Username: username, Message: "OK"}
+		json.NewEncoder(w).Encode(answer)
+	}
 }
 
 func profileHandler(w http.ResponseWriter, r *http.Request) {

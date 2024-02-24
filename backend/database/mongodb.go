@@ -77,7 +77,7 @@ func InsertNewUser(email string, username string, hashedPassword []byte) error{
 	} else if err != nil {
 		return err
 	} else {
-		return errors.New("username or email already exists")
+		return errors.New("Username or email already exists")
 	}
 	
 }
@@ -87,7 +87,7 @@ func GetPasswordByEmail(email string) ([]byte, error){
 	cursor := users.FindOne(ctx, filter)
 	result, err := cursor.Raw()
 	if err != nil {
-		return nil, err
+		return nil, errors.New("Email dosen't exist")
 	}
 
 	return result.Lookup("hashedPassword").Value, nil

@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import "./Authorization.css"
+import { emailValidator, passwordValidator, passwordVerificationValidator, usernameValidator } from './Validators';
 
 function SignUp() {
     const [data, setData] = useState({
@@ -8,69 +10,80 @@ function SignUp() {
         passwordVerification: '',
       });
 
-    function handleEmailChange(e) {
-        setData({...data, email: e.target.value})
-    }
-
-    function handleUsernameChange(e) {
-        setData({...data, username: e.target.value})
-    }
-
-    function handlePasswordChange(e) {
-        setData({...data, password: e.target.value})
-    }
-
-    function handlePasswordVerificationChange(e) {
-        setData({...data, passwordVerification: e.target.value})
-    }
+    const [validationErrors, setValidationErrors] = useState([])
+    const [serverError, setServerError] = useState('')
+    const onUpdateField = e => {
+      const nextDataState = {
+        ...data,
+        [e.target.name]: e.target.value,
+      };
+      setData(nextDataState);
+    };
 
     function handleSignUp(e) {
         e.preventDefault();
+        
+        var errors = [
+          emailValidator(data.email),
+          usernameValidator(data.username), 
+          passwordValidator(data.password), 
+          passwordVerificationValidator(data.passwordVerification, data.password)
+        ]
 
-        fetch('/api/signup', {
-          method: 'POST',
-          body: JSON.stringify(data),
-          mode: 'no-cors',
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            // Handle the response data
+        const isArrayEmpty = errors.every((error) => error === '')
+        setServerError('')
+        if(isArrayEmpty) {
+          fetch('/api/signup', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            mode: 'no-cors',
+            headers: {
+              'Content-Type': 'application/json',
+            }
           })
-          .catch((error) => {
-            console.log(error)
-          });
-
-          window.location.href = "login"
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.message === 'OK') {
+                window.location.href = "login"
+              } else {
+                return setServerError(data.message), setValidationErrors([])
+              }
+            })
+            .catch((error) => {
+              console.log(error)
+            })
+        } else {
+          setValidationErrors(errors)
+        }        
     }
 
     return (
-        <div style={{
-            textAlign: "center",
-        }}>
-            <form>
+        <div className="mainSignUp">
+          {serverError ?  
+          <div className='validationError'>
+            <h3>!{serverError}</h3>
+          </div> 
+          : null}
+            {validationErrors.map((error) => {
+              if (error) {
+                return (
+                  <div className='validationError'>
+                    <h3>!{error}</h3>
+                  </div>
+                )
+              }
+            })}
+            <form className="authorizationForm">
                 <label>Email</label>
-                <br></br>
-                <input type="text" name="email" onChange={handleEmailChange}/>
-                <br></br>
-                <br></br>
+                  <input type="text" name="email" onChange={onUpdateField}/>
                 <label>Username</label>
-                <br></br>
-                <input type="text" name="username" onChange={handleUsernameChange}/>
-                <br></br>
-                <br></br>
+                  <input type="text" name="username" onChange={onUpdateField}/>
                 <label>Password</label>
-                <br></br>
-                <input type="text" name="password" onChange={handlePasswordChange}/>
-                <br></br>
-                <br></br>
+                  <input type="text" name="password" onChange={onUpdateField}/>
                 <label>Verify password</label>
-                <br></br>
-                <input type="text" name="password_verification" onChange={handlePasswordVerificationChange}/>
-                <br></br>
-                <br></br>
+                  <input type="text" name="passwordVerification" onChange={onUpdateField}/>
+                  <br></br>
+                  <br></br>
                 <button type="submit" onClick={handleSignUp}>Create Account</button>
             </form>
         </div>
