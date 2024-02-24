@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import "./Authorization.css"
-import { emailValidator, passwordValidator, passwordVerificationValidator, usernameValidator } from './Validators';
+import { emailValidator, passwordValidator, passwordVerificationValidator, usernameValidator, dateOfBirthValidator } from './Validators';
+import { CountryDropdown } from 'react-country-region-selector';
 
 function SignUp() {
     const [data, setData] = useState({
@@ -8,14 +9,27 @@ function SignUp() {
         username: '',
         password: '',
         passwordVerification: '',
+        dateOfBirth: '',
+        country: '',
+        status: '',
+        description: ''
       });
-
     const [validationErrors, setValidationErrors] = useState([])
     const [serverError, setServerError] = useState('')
+
     const onUpdateField = e => {
+      console.log(e.target.value)
       const nextDataState = {
         ...data,
         [e.target.name]: e.target.value,
+      };
+      setData(nextDataState);
+    };
+
+    const onUpdateCountry = e => {
+      const nextDataState = {
+        ...data,
+        country: e,
       };
       setData(nextDataState);
     };
@@ -27,7 +41,8 @@ function SignUp() {
           emailValidator(data.email),
           usernameValidator(data.username), 
           passwordValidator(data.password), 
-          passwordVerificationValidator(data.passwordVerification, data.password)
+          passwordVerificationValidator(data.passwordVerification, data.password),
+          dateOfBirthValidator(data.dateOfBirth)
         ]
 
         const isArrayEmpty = errors.every((error) => error === '')
@@ -74,14 +89,29 @@ function SignUp() {
               }
             })}
             <form className="authorizationForm">
-                <label>Email</label>
-                  <input type="text" name="email" onChange={onUpdateField}/>
-                <label>Username</label>
+              <div className='authoInfo'>
+                <label>Email*</label>
+                  <input type="email" name="email" onChange={onUpdateField}/>
+                <label>Username*</label>
                   <input type="text" name="username" onChange={onUpdateField}/>
-                <label>Password</label>
-                  <input type="text" name="password" onChange={onUpdateField}/>
-                <label>Verify password</label>
-                  <input type="text" name="passwordVerification" onChange={onUpdateField}/>
+                <label>Password*</label>
+                  <input type="password" name="password" onChange={onUpdateField}/>
+                <label>Verify password*</label>
+                  <input type="password" name="passwordVerification" onChange={onUpdateField}/>
+              </div>
+              <div className='personalInfo'>
+                <label>Date of birth*</label>
+                  <input type="date" name="dateOfBirth" onChange={onUpdateField}/>
+                <label>Country</label>
+                  <CountryDropdown
+                  name='country'
+                  value={data.country}
+                  onChange={onUpdateCountry} />
+                <label>Status</label>
+                  <input type="text" name="status" onChange={onUpdateField}/>
+                <label>Description</label>
+                  <input type="text" name="description" onChange={onUpdateField}/>
+              </div>
                   <br></br>
                   <br></br>
                 <button type="submit" onClick={handleSignUp}>Create Account</button>

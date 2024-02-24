@@ -11,3 +11,8 @@
     margin: 5px;
 }
 
+.authorizationForm div {
+    display: inline-block;
+    margin: 16px;
+}
+

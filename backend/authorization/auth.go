@@ -7,13 +7,13 @@ import (
 	"encoding/base64"
 )
 
-func Registration(email string, username string, password string) error{
+func Registration(email string, username string, password string, dateOfBirth string, country string, status string, description string) error{
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
 
-	err = database.InsertNewUser(email, username, hashedPassword)
+	err = database.InsertNewUser(email, username, hashedPassword, dateOfBirth, country, status, description)
 	if err != nil {
 		return err
 	}

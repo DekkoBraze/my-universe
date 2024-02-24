@@ -31,3 +31,10 @@ export const emailValidator = email => {
     }
     return "";
   };
+
+  export const dateOfBirthValidator = (dateOfBirth) => {
+    if (!dateOfBirth) {
+      return "Field 'Date of birth' is required";
+    }
+    return "";
+  };

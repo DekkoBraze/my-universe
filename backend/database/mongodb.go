@@ -11,23 +11,23 @@ import (
 	//"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-var users *mongo.Collection 
-var profiles *mongo.Collection 
+var users *mongo.Collection
+var profiles *mongo.Collection
 var ctx = context.TODO()
 
 type User struct {
-	Email           string  	`bson:"email"`
-	Username        string		`bson:"username"`
-	HashedPassword  []byte  	`bson:"hashedPassword"`
-	CreatedAt		time.Time	`bson:"createdAt"`
-	SessionValue	string		`bson:"sessionValue"`
-	Age				string		`bson:"age"`
-	Country			string		`bson:"country"`
-	Status			string		`bson:"status"`
-	Description		string		`bson:"description"`
+	Email          string    `bson:"email"`
+	Username       string    `bson:"username"`
+	HashedPassword []byte    `bson:"hashedPassword"`
+	CreatedAt      time.Time `bson:"createdAt"`
+	SessionValue   string    `bson:"sessionValue"`
+	DateOfBirth    string 	 `bson:"dateOfBirth"`
+	Country        string    `bson:"country"`
+	Status         string    `bson:"status"`
+	Description    string    `bson:"description"`
 }
 
-func Init() error{
+func Init() error {
 	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017/")
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
@@ -35,9 +35,9 @@ func Init() error{
 	}
 
 	err = client.Ping(ctx, nil)
-  	if err != nil {
-    	return err
-  	}
+	if err != nil {
+		return err
+	}
 
 	database := client.Database("my-universe")
 	users = database.Collection("users")
@@ -45,27 +45,27 @@ func Init() error{
 	return nil
 }
 
-func InsertNewUser(email string, username string, hashedPassword []byte) error{
+func InsertNewUser(email string, username string, hashedPassword []byte, dateOfBirth string, country string, status string, description string) error {
 	filter := bson.D{
 		{"$or",
-		   bson.A{
-			bson.D{{"email", email}},
-			bson.D{{"email", username}},
-		   },
+			bson.A{
+				bson.D{{"email", email}},
+				bson.D{{"email", username}},
+			},
 		},
-	 }
+	}
 	cursor := users.FindOne(ctx, filter)
-	_, err:= cursor.Raw()
+	_, err := cursor.Raw()
 	if err == mongo.ErrNoDocuments {
-		newUser := User {
-			Email: email,
-			Username: username,
-			HashedPassword: hashedPassword, 
-			CreatedAt: time.Now(),
-			Age: "",
-			Country: "", 
-			Status: "", 
-			Description: "" }
+		newUser := User{
+			Email:          email,
+			Username:       username,
+			HashedPassword: hashedPassword,
+			CreatedAt:      time.Now(),
+			DateOfBirth:    dateOfBirth,
+			Country:        country,
+			Status:         status,
+			Description:    description}
 		_, err = users.InsertOne(ctx, newUser)
 		if err != nil {
 			return err
@@ -79,10 +79,10 @@ func InsertNewUser(email string, username string, hashedPassword []byte) error{
 	} else {
 		return errors.New("Username or email already exists")
 	}
-	
+
 }
 
-func GetPasswordByEmail(email string) ([]byte, error){
+func GetPasswordByEmail(email string) ([]byte, error) {
 	filter := bson.D{{"email", email}}
 	cursor := users.FindOne(ctx, filter)
 	result, err := cursor.Raw()
@@ -93,7 +93,7 @@ func GetPasswordByEmail(email string) ([]byte, error){
 	return result.Lookup("hashedPassword").Value, nil
 }
 
-func SetUserSessionValue(email string, sessionValue string) (error){
+func SetUserSessionValue(email string, sessionValue string) error {
 	filter := bson.D{{"email", email}}
 	update := bson.D{{"$set", bson.D{{"sessionValue", sessionValue}}}}
 	_, err := users.UpdateOne(ctx, filter, update)
@@ -103,7 +103,7 @@ func SetUserSessionValue(email string, sessionValue string) (error){
 	return nil
 }
 
-func GetProfileByUsername(username string) (bson.Raw, error){
+func GetProfileByUsername(username string) (bson.Raw, error) {
 	filter := bson.D{{"username", username}}
 	cursor := users.FindOne(ctx, filter)
 	result, err := cursor.Raw()
@@ -114,7 +114,7 @@ func GetProfileByUsername(username string) (bson.Raw, error){
 	return result, nil
 }
 
-func GetProfileBySessionValue(value string) (bson.Raw, error){
+func GetProfileBySessionValue(value string) (bson.Raw, error) {
 	filter := bson.D{{"sessionValue", value}}
 	cursor := users.FindOne(ctx, filter)
 	result, err := cursor.Raw()

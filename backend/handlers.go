@@ -18,6 +18,10 @@ func registrationHandler(w http.ResponseWriter, r *http.Request) {
 		Email        			string	`json:"email"`
 		Username				string  `json:"username"`
 		Password				string	`json:"password"`
+		DateOfBirth				string	`json:"dateOfBirth"`
+		Country					string	`json:"country"`
+		Status					string	`json:"status"`
+		Description				string	`json:"description"`
 	}
 
 	var data RegistrationData
@@ -30,12 +34,16 @@ func registrationHandler(w http.ResponseWriter, r *http.Request) {
 	email := data.Email
 	username := data.Username
 	password := data.Password
+	dateOfBirth := data.DateOfBirth
+	country := data.Country
+	status := data.Status
+	description := data.Description
 	
 	type Response struct{
 		Message        			string	`json:"message"`
 	}
 
-	err = authorization.Registration(email, username, password)
+	err = authorization.Registration(email, username, password, dateOfBirth, country, status, description)
 	if err != nil {
 		var response = Response{Message: err.Error()}
 		json.NewEncoder(w).Encode(response)
