@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom'
 import NotFound from '../NotFound';
 import "./Profile.css"
+import avatar from "../../avatarTemp.jpg"
 
 function Profile() {
     const [profileData, setProfileData] = useState([]);
@@ -22,6 +23,7 @@ function Profile() {
         return (
             <div className="mainProfile">
                 <div className="profileInfo">
+                    <img src={avatar} width={250} height={250}/>
                     <h1>{profileData.username}</h1>
                     <h3>{profileData.age}</h3>
                     <h3>{profileData.country}</h3>

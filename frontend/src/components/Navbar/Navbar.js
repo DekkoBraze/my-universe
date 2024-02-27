@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import "./Navbar.css"
+import avatar from "../../avatarTemp.jpg"
 
 function Navbar() {
   //const [profileData, setProfileData] = useState([]);
@@ -20,6 +21,9 @@ function Navbar() {
   return (
     <nav className="bar">
       <Link to="/" className="title">MyUniverse</Link>
+      <form className="search-bar">
+        <input type="text" name="search"></input>
+      </form>
       {
         profileData ? (
             <ul className="bar-profileInfo">

@@ -9,6 +9,7 @@ function SignUp() {
         username: '',
         password: '',
         passwordVerification: '',
+        avatar: null,
         dateOfBirth: '',
         country: '',
         status: '',
@@ -33,6 +34,22 @@ function SignUp() {
       };
       setData(nextDataState);
     };
+
+    function onAvatarUpdate(e) {
+      const nextDataState = {
+        ...data,
+        avatar: e.target.files[0],
+      };
+      setData(nextDataState);
+    }
+
+    function removeAvatar() {
+      const nextDataState = {
+        ...data,
+        avatar: null,
+      };
+      setData(nextDataState);
+    }
 
     function handleSignUp(e) {
         e.preventDefault();
@@ -100,6 +117,24 @@ function SignUp() {
                   <input type="password" name="passwordVerification" onChange={onUpdateField}/>
               </div>
               <div className='personalInfo'>
+              <label>Avatar</label>
+              {data.avatar && (
+                <div>
+                <img
+                  alt="not found"
+                  width={"125px"}
+                  src={URL.createObjectURL(data.avatar)}
+                />
+                <br></br>
+                <button onClick={() => removeAvatar()}>Remove</button>
+                </div>
+              )}
+              <br></br>
+              <input
+                type="file"
+                name="myImage"
+                onChange={onAvatarUpdate}
+              />
                 <label>Date of birth*</label>
                   <input type="date" name="dateOfBirth" onChange={onUpdateField}/>
                 <label>Country</label>

@@ -18,6 +18,13 @@
     display: inline-block;
 }
 
+.search-bar input {
+    width: 800px;
+    height: 20px;
+    margin-top: 16px;
+    margin-left: 20rem;
+}
+
 .auth {
     list-style-type: none;
     text-align:right;
