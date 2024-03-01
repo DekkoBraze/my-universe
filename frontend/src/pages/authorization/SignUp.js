@@ -19,7 +19,6 @@ function SignUp() {
     const [serverError, setServerError] = useState('')
 
     const onUpdateField = e => {
-      console.log(e.target.value)
       const nextDataState = {
         ...data,
         [e.target.name]: e.target.value,

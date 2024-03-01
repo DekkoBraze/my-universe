@@ -5,6 +5,7 @@ import NotFound from './pages/NotFound';
 import SignUp from './pages/authorization/SignUp'
 import Login from './pages/authorization/Login';
 import Navbar from './components/Navbar/Navbar';
+import Search from './pages/Search/Search'
 import { Routes, Route } from "react-router-dom";
 import "./App.css"
 
@@ -15,6 +16,7 @@ function App() {
             <Routes>
                 <Route path="/" exact element={<Home />} />
                 <Route path="/profile/:username/" element={<Profile />} />
+                <Route path="/search/" element={<Search />} />
                 <Route path="/signup/" element={<SignUp />} />
                 <Route path="/login/" element={<Login />} />
                 <Route path="*" element={<NotFound />} />

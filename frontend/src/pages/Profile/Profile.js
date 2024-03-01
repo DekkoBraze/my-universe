@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom'
+import { Link } from "react-router-dom";
 import NotFound from '../NotFound';
 import "./Profile.css"
 import avatar from "../../avatarTemp.jpg"
@@ -8,6 +9,8 @@ function Profile() {
     const [profileData, setProfileData] = useState([]);
     const [requestCompleted, setRequestCompleted] = useState(false)
     const { username } = useParams()
+    const loggedUser = JSON.parse(localStorage.getItem("user"));
+
     useEffect(() => {
         fetch('/api/profile/' + username)
         .then(response => response.json())
@@ -17,6 +20,7 @@ function Profile() {
         })
         .catch(error => console.error(error));
     }, [username]);
+
     if(requestCompleted)
     {
         if(!profileData.username) { return <NotFound /> }
@@ -30,6 +34,11 @@ function Profile() {
                     <h3>{profileData.status}</h3>
                     <h3>{profileData.description}</h3>
                 </div>
+                {
+                    loggedUser && loggedUser.username === profileData.username && (
+                        <Link className='searchLink' to="/search/">Add entities</Link>
+                    )
+                }
             </div>
         );
     }

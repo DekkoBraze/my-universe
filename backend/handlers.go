@@ -105,6 +105,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 
 func profileHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", reactUrl)
+	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	username := vars["username"]
 	profileBson, err := database.GetProfileByUsername(username)
@@ -117,8 +118,9 @@ func profileHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func getCurrentUser(w http.ResponseWriter, r *http.Request) {
-	userFound := false
 	w.Header().Set("Access-Control-Allow-Origin", reactUrl)
+	w.Header().Set("Content-Type", "application/json")
+	userFound := false
 	for _, cookie := range r.Cookies() {
     if cookie.Name == "my-universe" {
 		profileBson, err := database.GetProfileBySessionValue(cookie.Value)
@@ -131,4 +133,17 @@ func getCurrentUser(w http.ResponseWriter, r *http.Request) {
     }
 }
 	if (!userFound) {json.NewEncoder(w).Encode("USER_NOT_LOGGED")}
+}
+
+func rawgHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", reactUrl)
+	w.Header().Set("Content-Type", "application/json")
+	const rawgApiKey = "26ed1d032db149269419f1eadbf3d3f7"
+
+	type Response struct{
+		Message        		string	`json:"message"`
+	}
+
+	var response = Response{Message: rawgApiKey}
+	json.NewEncoder(w).Encode(response)
 }

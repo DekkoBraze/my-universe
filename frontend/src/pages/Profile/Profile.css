@@ -7,3 +7,10 @@
 .mainSignUp {
     text-align: center;
 }
+
+.searchLink {
+    text-decoration: none;
+    color:white;
+    font-size: 30px;
+    margin-left: 90%;
+}
