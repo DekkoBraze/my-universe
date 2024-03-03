@@ -12,6 +12,7 @@ import (
 )
 
 var users *mongo.Collection
+var items *mongo.Collection
 var profiles *mongo.Collection
 var ctx = context.TODO()
 
@@ -25,6 +26,14 @@ type User struct {
 	Country        string    `bson:"country"`
 	Status         string    `bson:"status"`
 	Description    string    `bson:"description"`
+}
+
+type Item struct{
+	Username        		string	`bson:"username"`
+	ItemId					int  `bson:"itemId"`
+	ItemImage				string	`bson:"itemImage"`
+	Rating					int	`bson:"rating"`
+	Comment					string	`bson:"comment"`
 }
 
 func Init() error {
@@ -41,6 +50,7 @@ func Init() error {
 
 	database := client.Database("my-universe")
 	users = database.Collection("users")
+	items = database.Collection("items")
 	profiles = database.Collection("profiles")
 	return nil
 }
@@ -50,7 +60,7 @@ func InsertNewUser(email string, username string, hashedPassword []byte, dateOfB
 		{"$or",
 			bson.A{
 				bson.D{{"email", email}},
-				bson.D{{"email", username}},
+				bson.D{{"username", username}},
 			},
 		},
 	}
@@ -70,16 +80,12 @@ func InsertNewUser(email string, username string, hashedPassword []byte, dateOfB
 		if err != nil {
 			return err
 		}
-		if err != nil {
-			return err
-		}
 		return nil
 	} else if err != nil {
 		return err
 	} else {
 		return errors.New("Username or email already exists")
 	}
-
 }
 
 func GetPasswordByEmail(email string) ([]byte, error) {
@@ -123,4 +129,44 @@ func GetProfileBySessionValue(value string) (bson.Raw, error) {
 	}
 
 	return result, nil
+}
+
+func AddItem(username string, itemId int, itemImage string, rating int, comment string) error{
+	filter := bson.D{
+		{"$and",
+			bson.A{
+				bson.D{{"username", username}},
+				bson.D{{"itemId", itemId}},
+			},
+		},
+	}
+	
+	cursor := items.FindOne(ctx, filter)
+	_, err := cursor.Raw()
+	if err == mongo.ErrNoDocuments {
+		newItem := Item{
+			Username:   username,
+			ItemId: 	itemId,
+			ItemImage:  itemImage,
+			Rating:     rating,
+			Comment:    comment}
+		_, err = items.InsertOne(ctx, newItem)
+		if err != nil {
+			return err
+		}
+		return nil
+	} else if err != nil {
+		return err
+	} else {
+		update := bson.D{{"$set", bson.D{{"rating", rating}, {"comment", comment}}}}
+		_, err = items.UpdateOne(ctx, filter, update)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+}
+
+func GetUserItems(username string) {
+
 }

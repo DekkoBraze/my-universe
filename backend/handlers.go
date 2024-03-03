@@ -31,19 +31,13 @@ func registrationHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Print("registrationHandler: ", err)
 	}
-	email := data.Email
-	username := data.Username
-	password := data.Password
-	dateOfBirth := data.DateOfBirth
-	country := data.Country
-	status := data.Status
-	description := data.Description
 	
 	type Response struct{
 		Message        			string	`json:"message"`
 	}
 
-	err = authorization.Registration(email, username, password, dateOfBirth, country, status, description)
+	err = authorization.Registration(data.Email, data.Username, data.Password, 
+		data.DateOfBirth, data.Country, data.Status, data.Description)
 	if err != nil {
 		var response = Response{Message: err.Error()}
 		json.NewEncoder(w).Encode(response)
@@ -146,4 +140,39 @@ func rawgHandler(w http.ResponseWriter, r *http.Request) {
 
 	var response = Response{Message: rawgApiKey}
 	json.NewEncoder(w).Encode(response)
+}
+
+func addItem(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", reactUrl)
+	w.Header().Set("Content-Type", "application/json")
+
+	type ItemData struct{
+		Username        			string	`json:"username"`
+		ItemId						int  	`json:"itemId"`
+		ItemImage					string  `json:"itemImage"`
+		Rating						int		`json:"rating"`
+		Comment						string	`json:"comment"`
+	}
+
+	var data ItemData
+
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&data)
+	if err != nil {
+		log.Print("addItem: ", err)
+	}
+
+	type Response struct{
+		Message        			string	`json:"message"`
+	} 
+
+	err = database.AddItem(data.Username, data.ItemId, data.ItemImage, data.Rating, data.Comment)
+	if err != nil {
+		log.Print("addItem: ", err)
+		var response = Response{Message: err.Error()}
+		json.NewEncoder(w).Encode(response)
+	} else {
+		var response = Response{Message: "OK"}
+		json.NewEncoder(w).Encode(response)
+	}
 }

@@ -67,7 +67,6 @@ function SignUp() {
           fetch('/api/signup', {
             method: 'POST',
             body: JSON.stringify(data),
-            mode: 'no-cors',
             headers: {
               'Content-Type': 'application/json',
             }
