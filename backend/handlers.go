@@ -176,3 +176,14 @@ func addItem(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 	}
 }
+
+func getUserItems(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	username := vars["username"]
+	items, err := database.GetUserItems(username)
+	if err != nil {
+		log.Print("getUserItems: ", err)
+	}
+
+	json.NewEncoder(w).Encode(items)
+}

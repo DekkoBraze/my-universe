@@ -24,7 +24,7 @@ func main() {
 	subrouter.HandleFunc("/getUser", getCurrentUser).Methods("GET", "OPTIONS")
 	subrouter.HandleFunc("/profile/{username}", profileHandler).Methods("GET", "OPTIONS")
 	subrouter.HandleFunc("/createItem", addItem).Methods("POST", "OPTIONS")
-	subrouter.HandleFunc("/getUserItems", rawgHandler).Methods("GET", "OPTIONS")
+	subrouter.HandleFunc("/getUserItems/{username}", getUserItems).Methods("GET", "OPTIONS")
 	subrouter.HandleFunc("/getRawgKey", rawgHandler).Methods("GET", "OPTIONS")
 	http.Handle("/", router)
 

@@ -7,6 +7,7 @@ import avatar from "../../avatarTemp.jpg"
 
 function Profile() {
     const [profileData, setProfileData] = useState([]);
+    const [userItems, setUserItems] = useState([])
     const [requestCompleted, setRequestCompleted] = useState(false)
     const { username } = useParams()
     const loggedUser = JSON.parse(localStorage.getItem("user"));
@@ -16,13 +17,19 @@ function Profile() {
         .then(response => response.json())
         .then(data => {
             setProfileData(data)
+            fetch('/api/getUserItems/' + username)
+            .then(response => response.json())
+            .then(data => {
+                setUserItems(data)
+            })
+            .catch(error => console.error(error))
             setRequestCompleted(true)
         })
         .catch(error => console.error(error));
     }, [username]);
 
     if(requestCompleted)
-    {
+    {   
         if(!profileData.username) { return <NotFound /> }
         return (
             <div className="mainProfile">
@@ -34,6 +41,18 @@ function Profile() {
                     <h3>{profileData.status}</h3>
                     <h3>{profileData.description}</h3>
                 </div>
+                {
+                    userItems.map((item) => {
+                        return (
+                            <div 
+                            className="item"
+                            key={item.ItemId}
+                            > 
+                            <img src={item.ItemImage} width={125} height={125}></img>
+                            </div>
+                        )
+                    })
+                }
                 {
                     loggedUser && loggedUser.username === profileData.username && (
                         <Link className='searchLink' to="/search/">Add entities</Link>

@@ -167,6 +167,18 @@ func AddItem(username string, itemId int, itemImage string, rating int, comment 
 	}
 }
 
-func GetUserItems(username string) {
+func GetUserItems(username string) ([]Item, error){
+	filter := bson.D{{"username", username}}
+	cursor, err := items.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	
+	var results []Item
+   	err = cursor.All(ctx, &results)
+	if err != nil {
+		return nil, err
+	}
 
+	return results, nil
 }
