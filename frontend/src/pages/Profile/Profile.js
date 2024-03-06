@@ -4,14 +4,18 @@ import { Link } from "react-router-dom";
 import NotFound from '../NotFound';
 import "./Profile.css"
 import avatar from "../../avatarTemp.jpg"
+import ItemModal from '../../components/ItemModal/ItemModal'
 
 function Profile() {
+    const [isItemOpen, setIsItemOpen] = useState(false)
+    const [itemModalInfo, setItemModalInfo] = useState('')
+
     const [profileData, setProfileData] = useState([]);
     const [userItems, setUserItems] = useState([])
     const [requestCompleted, setRequestCompleted] = useState(false)
     const { username } = useParams()
     const loggedUser = JSON.parse(localStorage.getItem("user"));
-
+    
     useEffect(() => {
         fetch('/api/profile/' + username)
         .then(response => response.json())
@@ -28,6 +32,15 @@ function Profile() {
         .catch(error => console.error(error));
     }, [username]);
 
+    function handleItem(item) {
+        setIsItemOpen(true);
+        setItemModalInfo(item);
+    }
+
+    function closeItem() {
+        setIsItemOpen(false);
+    };
+
     if(requestCompleted)
     {   
         if(!profileData.username) { return <NotFound /> }
@@ -37,27 +50,43 @@ function Profile() {
                     <img src={avatar} width={250} height={250}/>
                     <h1>{profileData.username}</h1>
                     <h3>{profileData.age}</h3>
+                    <h3>{profileData.gender}</h3>
                     <h3>{profileData.country}</h3>
                     <h3>{profileData.status}</h3>
                     <h3>{profileData.description}</h3>
                 </div>
                 {
+                    userItems && (
                     userItems.map((item) => {
+                        var itemInfo = "Name: " + item.ItemName + "\nRating: " + item.Rating + 
+                        "\nComment: " + item.Comment + "\nRated At: " + item.CreatedAt
                         return (
                             <div 
                             className="item"
-                            key={item.ItemId}
-                            > 
-                            <img src={item.ItemImage} width={125} height={125}></img>
+                            key={item.ItemId}> 
+                            <img 
+                            src={item.ItemImage} 
+                            width={125} 
+                            height={125} 
+                            title={itemInfo}
+                            onClick={() => {handleItem(item)}}>
+                            </img>
                             </div>
                         )
-                    })
+                    }))
                 }
                 {
                     loggedUser && loggedUser.username === profileData.username && (
-                        <Link className='searchLink' to="/search/">Add entities</Link>
+                        <Link className='searchLink' to="/search/">Add items</Link>
                     )
                 }
+                <div>
+                    <ItemModal
+                    isItemOpen={isItemOpen}
+                    itemInfo={itemModalInfo}
+                    onClose={closeItem}
+                    />
+                </div>
             </div>
         );
     }

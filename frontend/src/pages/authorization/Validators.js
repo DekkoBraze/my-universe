@@ -38,3 +38,10 @@ export const emailValidator = email => {
     }
     return "";
   };
+
+  export const genderValidator = (gender) => {
+    if (!gender || gender === "-") {
+      return "Field 'Gender' is required";
+    }
+    return "";
+  };

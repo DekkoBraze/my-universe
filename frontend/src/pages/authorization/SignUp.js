@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import "./Authorization.css"
-import { emailValidator, passwordValidator, passwordVerificationValidator, usernameValidator, dateOfBirthValidator } from './Validators';
+import { emailValidator, passwordValidator, passwordVerificationValidator, usernameValidator, dateOfBirthValidator, genderValidator } from './Validators';
 import { CountryDropdown } from 'react-country-region-selector';
 
 function SignUp() {
@@ -11,6 +11,7 @@ function SignUp() {
         passwordVerification: '',
         avatar: null,
         dateOfBirth: '',
+        gender: '',
         country: '',
         status: '',
         description: ''
@@ -52,13 +53,14 @@ function SignUp() {
 
     function handleSignUp(e) {
         e.preventDefault();
-        
+
         var errors = [
           emailValidator(data.email),
           usernameValidator(data.username), 
           passwordValidator(data.password), 
           passwordVerificationValidator(data.passwordVerification, data.password),
-          dateOfBirthValidator(data.dateOfBirth)
+          dateOfBirthValidator(data.dateOfBirth),
+          genderValidator(data.gender)
         ]
 
         const isArrayEmpty = errors.every((error) => error === '')
@@ -135,15 +137,22 @@ function SignUp() {
               />
                 <label>Date of birth*</label>
                   <input type="date" name="dateOfBirth" onChange={onUpdateField}/>
+                <label>Gender*</label>
+                <select name="gender" onChange={onUpdateField}> 
+                  <option value="-">-</option> 
+                  <option value="Male">Male</option> 
+                  <option value="Female">Female</option> 
+                  <option value="Other">Other</option> 
+                </select>
                 <label>Country</label>
                   <CountryDropdown
                   name='country'
                   value={data.country}
                   onChange={onUpdateCountry} />
                 <label>Status</label>
-                  <input type="text" name="status" onChange={onUpdateField}/>
+                  <input type="text" name="status" onChange={onUpdateField} maxLength={30}/>
                 <label>Description</label>
-                  <input type="text" name="description" onChange={onUpdateField}/>
+                  <input type="text" name="description" onChange={onUpdateField} maxLength={100}/>
               </div>
                   <br></br>
                   <br></br>

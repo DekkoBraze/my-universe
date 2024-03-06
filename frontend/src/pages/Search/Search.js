@@ -8,6 +8,7 @@ function Search() {
     const [itemJsonData, setItemJsonData] = useState({
       username: '',
       itemId: '',
+      itemName: '',
       itemImage: '',
       rating: '',
       comment: ''
@@ -41,6 +42,7 @@ function Search() {
           ...itemJsonData,
           username: loggedUser.username,
           itemId: singleResult.id,
+          itemName: singleResult.name,
           itemImage: singleResult.background_image
         })
       }
@@ -80,6 +82,7 @@ function Search() {
               setItemJsonData({
                 username: '',
                 itemId: '',
+                itemName: '',
                 itemImage: '',
                 rating: '',
                 comment: ''
@@ -131,7 +134,7 @@ function Search() {
               <label>Rating</label>
               <input type="number" name="rating" style={{width: 45}} onChange={handleRating} value={itemJsonData.rating}></input>
               <label>Comment</label>
-              <input type="text" name="comment" style={{width: 150}} maxLength={30} onChange={handleField}></input>
+              <input type="text" name="comment" style={{width: 150}} maxLength={64} onChange={handleField}></input>
               <button type="submit" onClick={handleCollecting}>Add to the collection</button>
             </div>
           )

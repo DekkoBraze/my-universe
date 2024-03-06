@@ -11,6 +11,11 @@ import (
 
 var reactUrl = "http://localhost:3000"
 
+type Response struct{
+	Message        			string	`json:"message"`
+	Username				string	`json:"username"`
+}
+
 func registrationHandler(w http.ResponseWriter, r *http.Request) {	
 	w.Header().Set("Access-Control-Allow-Origin", reactUrl)
 	w.Header().Set("Content-Type", "application/json")		
@@ -19,6 +24,7 @@ func registrationHandler(w http.ResponseWriter, r *http.Request) {
 		Username				string  `json:"username"`
 		Password				string	`json:"password"`
 		DateOfBirth				string	`json:"dateOfBirth"`
+		Gender					string	`json:"gender"`
 		Country					string	`json:"country"`
 		Status					string	`json:"status"`
 		Description				string	`json:"description"`
@@ -31,13 +37,9 @@ func registrationHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Print("registrationHandler: ", err)
 	}
-	
-	type Response struct{
-		Message        			string	`json:"message"`
-	}
 
 	err = authorization.Registration(data.Email, data.Username, data.Password, 
-		data.DateOfBirth, data.Country, data.Status, data.Description)
+		data.DateOfBirth, data.Gender, data.Country, data.Status, data.Description)
 	if err != nil {
 		var response = Response{Message: err.Error()}
 		json.NewEncoder(w).Encode(response)
@@ -57,11 +59,6 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var data LoginData
-	
-	type Response struct{
-		Message        			string	`json:"message"`
-		Username				string	`json:"username"`
-	}
 
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&data)
@@ -134,10 +131,6 @@ func rawgHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	const rawgApiKey = "26ed1d032db149269419f1eadbf3d3f7"
 
-	type Response struct{
-		Message        		string	`json:"message"`
-	}
-
 	var response = Response{Message: rawgApiKey}
 	json.NewEncoder(w).Encode(response)
 }
@@ -149,6 +142,7 @@ func addItem(w http.ResponseWriter, r *http.Request) {
 	type ItemData struct{
 		Username        			string	`json:"username"`
 		ItemId						int  	`json:"itemId"`
+		ItemName					string 	`json:"itemName"`
 		ItemImage					string  `json:"itemImage"`
 		Rating						int		`json:"rating"`
 		Comment						string	`json:"comment"`
@@ -162,11 +156,7 @@ func addItem(w http.ResponseWriter, r *http.Request) {
 		log.Print("addItem: ", err)
 	}
 
-	type Response struct{
-		Message        			string	`json:"message"`
-	} 
-
-	err = database.AddItem(data.Username, data.ItemId, data.ItemImage, data.Rating, data.Comment)
+	err = database.AddItem(data.Username, data.ItemId, data.ItemName, data.ItemImage, data.Rating, data.Comment)
 	if err != nil {
 		log.Print("addItem: ", err)
 		var response = Response{Message: err.Error()}
@@ -178,6 +168,8 @@ func addItem(w http.ResponseWriter, r *http.Request) {
 }
 
 func getUserItems(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", reactUrl)
+
 	vars := mux.Vars(r)
 	username := vars["username"]
 	items, err := database.GetUserItems(username)
@@ -186,4 +178,22 @@ func getUserItems(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(items)
+}
+
+func deleteUserItem(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", reactUrl)
+	
+	vars := mux.Vars(r)
+	username := vars["username"]
+	itemId := vars["itemId"]
+
+	err := database.DeleteUserItem(username, itemId) //не находит айтем
+	if err != nil {
+		log.Print("deleteUserItem: ", err)
+		var response = Response{Message: err.Error()}
+		json.NewEncoder(w).Encode(response)
+	} else {
+		var response = Response{Message: "OK"}
+		json.NewEncoder(w).Encode(response)
+	}
 }

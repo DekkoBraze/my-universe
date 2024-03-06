@@ -1,7 +1,10 @@
 .profileInfo {
     font-size: 20;
-    margin-left: 32px;
-    margin-top: 32px;
+    padding-left: 2rem;
+    padding-top: 2rem;
+    padding-bottom: 1rem;
+    width: 17.5rem;
+    background-color:darkslategrey;
 }
 
 .mainSignUp {

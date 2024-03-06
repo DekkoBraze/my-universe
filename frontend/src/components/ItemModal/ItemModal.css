@@ -1,0 +1,67 @@
+.itemModal {
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: sans-serif;
+    color: white;
+}
+
+.itemWindow {
+    border: 1px solid white;
+    background-color: darkslategray;
+    text-align: center;
+    border-radius: 15px;
+}
+
+.exit {
+    cursor: pointer;
+    margin: 1rem;
+    float: right;
+    border-radius: 15px;
+}
+
+.itemImage {
+    margin-left: 10rem;
+    margin-right: 10rem;
+    border: 1px solid white;
+    border-radius: 15px;
+}
+
+label {
+    display: block;
+    align-items: center;
+    margin: 5px;
+}
+
+.inputRating {
+    float: inline-start;
+}
+
+.inputRating label {
+    margin-left: 10rem;
+    margin-right: -9rem;
+}
+
+.inputRating input {
+    margin-left: 10rem;
+    margin-right: -9rem;
+}
+
+textarea {
+    resize: none;
+}
+
+.inputs div {
+    display: inline-block;
+}
+
+button {
+    margin: 1rem;
+    border-radius: 15px;
+}

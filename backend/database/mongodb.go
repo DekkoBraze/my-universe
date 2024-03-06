@@ -4,7 +4,8 @@ import (
 	"context"
 	"errors"
 	"time"
-
+	//"log"
+	"strconv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -13,27 +14,29 @@ import (
 
 var users *mongo.Collection
 var items *mongo.Collection
-var profiles *mongo.Collection
 var ctx = context.TODO()
 
 type User struct {
-	Email          string    `bson:"email"`
-	Username       string    `bson:"username"`
-	HashedPassword []byte    `bson:"hashedPassword"`
-	CreatedAt      time.Time `bson:"createdAt"`
-	SessionValue   string    `bson:"sessionValue"`
-	DateOfBirth    string 	 `bson:"dateOfBirth"`
-	Country        string    `bson:"country"`
-	Status         string    `bson:"status"`
-	Description    string    `bson:"description"`
+	Email          	string    	`bson:"email"`
+	Username       	string    	`bson:"username"`
+	HashedPassword 	[]byte    	`bson:"hashedPassword"`
+	CreatedAt      	time.Time 	`bson:"createdAt"`
+	SessionValue   	string    	`bson:"sessionValue"`
+	DateOfBirth    	string 	 	`bson:"dateOfBirth"`
+	Gender			string		`bson:"gender"`
+	Country        	string    	`bson:"country"`
+	Status         	string    	`bson:"status"`
+	Description    	string    	`bson:"description"`
 }
 
 type Item struct{
-	Username        		string	`bson:"username"`
-	ItemId					int  `bson:"itemId"`
-	ItemImage				string	`bson:"itemImage"`
-	Rating					int	`bson:"rating"`
-	Comment					string	`bson:"comment"`
+	Username        		string		`bson:"username"`
+	CreatedAt      			time.Time 	`bson:"createdAt"`
+	ItemId					int  		`bson:"itemId"`
+	ItemName				string 		`bson:"itemName"`
+	ItemImage				string		`bson:"itemImage"`
+	Rating					int			`bson:"rating"`
+	Comment					string		`bson:"comment"`
 }
 
 func Init() error {
@@ -51,11 +54,10 @@ func Init() error {
 	database := client.Database("my-universe")
 	users = database.Collection("users")
 	items = database.Collection("items")
-	profiles = database.Collection("profiles")
 	return nil
 }
 
-func InsertNewUser(email string, username string, hashedPassword []byte, dateOfBirth string, country string, status string, description string) error {
+func InsertNewUser(email string, username string, hashedPassword []byte, dateOfBirth string, gender string, country string, status string, description string) error {
 	filter := bson.D{
 		{"$or",
 			bson.A{
@@ -73,6 +75,7 @@ func InsertNewUser(email string, username string, hashedPassword []byte, dateOfB
 			HashedPassword: hashedPassword,
 			CreatedAt:      time.Now(),
 			DateOfBirth:    dateOfBirth,
+			Gender:			gender,
 			Country:        country,
 			Status:         status,
 			Description:    description}
@@ -131,7 +134,7 @@ func GetProfileBySessionValue(value string) (bson.Raw, error) {
 	return result, nil
 }
 
-func AddItem(username string, itemId int, itemImage string, rating int, comment string) error{
+func AddItem(username string, itemId int, itemName string, itemImage string, rating int, comment string) error{
 	filter := bson.D{
 		{"$and",
 			bson.A{
@@ -145,11 +148,13 @@ func AddItem(username string, itemId int, itemImage string, rating int, comment 
 	_, err := cursor.Raw()
 	if err == mongo.ErrNoDocuments {
 		newItem := Item{
-			Username:   username,
-			ItemId: 	itemId,
-			ItemImage:  itemImage,
-			Rating:     rating,
-			Comment:    comment}
+			Username:   	username,
+			CreatedAt:      time.Now(),
+			ItemId: 		itemId,
+			ItemName: 		itemName,
+			ItemImage:  	itemImage,
+			Rating:     	rating,
+			Comment:    	comment}
 		_, err = items.InsertOne(ctx, newItem)
 		if err != nil {
 			return err
@@ -181,4 +186,25 @@ func GetUserItems(username string) ([]Item, error){
 	}
 
 	return results, nil
+}
+
+func DeleteUserItem(username string, itemId string) error{
+	itemIdInt, err := strconv.Atoi(itemId)
+	if err != nil {
+		return err
+	}
+	filter := bson.D{
+		{"$and",
+			bson.A{
+				bson.D{{"username", username}},
+				bson.D{{"itemId", itemIdInt}},
+			},
+		},
+	}
+
+	_, err = items.DeleteOne(ctx, filter)
+	if err != nil {
+		return err
+	}
+	return nil
 }
