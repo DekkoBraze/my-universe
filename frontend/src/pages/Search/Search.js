@@ -65,6 +65,15 @@ function Search() {
               })
               .catch(error => console.error(error));
             })
+          } else if (itemType === 'book') {
+            fetch(
+              `https://openlibrary.org/search.json?q=${e.target.value}`
+            )
+            .then(response => response.json())
+            .then(data => {
+              setSearchData(data.docs)
+            })
+            .catch(error => console.error(error));
           }
         }
       }
@@ -107,20 +116,42 @@ function Search() {
             Username: loggedUser.username,
             ItemType: itemType,
             ItemId: singleResult.mbid,
+            ItemArtist: singleResult.artist,
             ItemName: singleResult.name,
             ItemImage: singleResult.image[3]['#text'] 
           })
+        } else if (itemType === 'book') {
+          setItemJsonData({
+            ...itemJsonData,
+            Username: loggedUser.username,
+            ItemType: itemType,
+            ItemId: singleResult.key,
+            ItemArtist: singleResult.author_name,
+            ItemName: singleResult.title,
+            ItemImage: `https://covers.openlibrary.org/b/isbn/${singleResult.isbn[0]}-M.jpg`
+          })
         }
-        
       }
 
       function closeItem() {
         setIsItemOpen(false);
     };
 
+    function searchFields(singleResult) {
+      if (itemType === 'game' || itemType === 'series') {
+        return [singleResult.id, singleResult.name]
+      } else if (itemType === 'movie') {
+        return [singleResult.id, singleResult.title]
+      } else if (itemType === 'music') {
+        return [singleResult.mbid, singleResult.artist + ' - ' + singleResult.name]
+      } else if (itemType === 'book') {
+        return [singleResult.key, singleResult.author_name + ' - ' + singleResult.title]
+      }
+    }
+
     return (
         <div className='searchMain'>
-        <h2 className="searchTitle">Search new entity</h2>
+        <h2 className="searchTitle">Search new item</h2>
         
         <div className='search-bar'>
         <select name="itemType" onChange={(e) => {setItemType(e.target.value); setSearchData([])}}> 
@@ -137,16 +168,18 @@ function Search() {
             <div className='searchResults'>
               {
                 searchData.map((singleResult) => {
-                  if (singleResult.mbid !== '') {
+                  if (itemType === 'movie' && singleResult.mbid !== '' || itemType === 'book' && singleResult.isbn !== undefined) {
+                    console.log(singleResult)
+                    const [keyNum, name] = searchFields(singleResult)
                     return (
                       <div 
                       className="singleResult"
-                      key={itemType === 'music' ? singleResult.mbid : singleResult.id}
+                      key={keyNum}
                       onClick={() =>
                         singleResultView(singleResult)
                       }
                       > 
-                      {itemType === 'game' || itemType === 'series' || itemType === 'music' ? singleResult.name : singleResult.title}
+                      {name}
                       </div>
                     )
                   }
