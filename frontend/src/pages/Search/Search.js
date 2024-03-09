@@ -1,104 +1,135 @@
 import React, { useState } from 'react';
 import "./Search.css"
 import debounce from 'lodash.debounce'
+import ItemModal from '../../components/ItemModal/ItemModal'
 
 function Search() {
+    const [itemType, setItemType] = useState('game')
+    const [isItemOpen, setIsItemOpen] = useState(false)
     const [searchData, setSearchData] = useState([]);
-    const [singleResult, setSingleResult] = useState([])
-    const [itemJsonData, setItemJsonData] = useState({
-      username: '',
-      itemId: '',
-      itemName: '',
-      itemImage: '',
-      rating: '',
-      comment: ''
-    })
+    const [itemJsonData, setItemJsonData] = useState({})
     const loggedUser = JSON.parse(localStorage.getItem("user"));
 
     const handleSearch = async (e) => {
         if (e.target.value.length >= 3) {
-          fetch('/api/getRawgKey')
-          .then(response => response.json())
-          .then(data => {
-          fetch(
-            `https://api.rawg.io/api/games?key=${data.message}&search=${e.target.value}`
-          )
-          .then(response => response.json())
-          .then(data => {
-              setSearchData(data.results)
+          if (itemType === 'game') {
+            fetch('/api/getRawgKey')
+            .then(response => response.json())
+            .then(data => {
+              fetch(
+                `https://api.rawg.io/api/games?key=${data.message}&search=${e.target.value}`
+              )
+              .then(response => response.json())
+              .then(data => {
+                setSearchData(data.results)
+              })
+              .catch(error => console.error(error));
           })
-          .catch(error => console.error(error));
-        })
-        .catch(error => console.error(error));
+            .catch(error => console.error(error));
+          } else if (itemType === 'movie') {
+            fetch('/api/getTmdbKey')
+            .then(response => response.json())
+            .then(data => {
+              fetch(
+                `https://api.themoviedb.org/3/search/movie?query=${e.target.value}&api_key=${data.message}`
+              )
+              .then(response => response.json())
+              .then(data => {
+                setSearchData(data.results)
+              })
+              .catch(error => console.error(error));
+            })
+          } else if (itemType === 'series') {
+            fetch('/api/getTmdbKey')
+            .then(response => response.json())
+            .then(data => {
+              fetch(
+                `https://api.themoviedb.org/3/search/tv?query=${e.target.value}&api_key=${data.message}`
+              )
+              .then(response => response.json())
+              .then(data => {
+                setSearchData(data.results)
+              })
+              .catch(error => console.error(error));
+            })
+          } else if (itemType === 'music') {
+            fetch('/api/getLastfmKey')
+            .then(response => response.json())
+            .then(data => {
+              fetch(
+                `https://ws.audioscrobbler.com/2.0/?method=album.search&album=${e.target.value}&api_key=${data.message}&format=json`
+              )
+              .then(response => response.json())
+              .then(data => {
+                setSearchData(data.results.albummatches.album)
+              })
+              .catch(error => console.error(error));
+            })
+          }
         }
       }
     
       const debouncedChange = debounce(handleSearch, 600);
       
       function singleResultView(singleResult) {
-        setSingleResult(singleResult)
+        setIsItemOpen(true)
         setSearchData([])
-        setItemJsonData({
-          ...itemJsonData,
-          username: loggedUser.username,
-          itemId: singleResult.id,
-          itemName: singleResult.name,
-          itemImage: singleResult.background_image
-        })
-      }
-
-      function handleField(e) {
-        const nextDataState = {
-          ...itemJsonData,
-          [e.target.name]: e.target.value,
-        };
-        setItemJsonData(nextDataState);
-      }
-
-      function handleRating(e) {
-        var nextValue = Math.max(Number(0), Math.min(Number(10), Number(e.target.value)));
-        if (nextValue === 0) {
-          nextValue = ''
-        }
-        const nextDataState = {
-          ...itemJsonData,
-          [e.target.name]: nextValue,
-        };
-        setItemJsonData(nextDataState);
-      }
-
-      function handleCollecting() {
-        fetch('/api/createItem', {
-          method: 'POST',
-          body: JSON.stringify(itemJsonData),
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.message === 'OK') {
-              setSingleResult([])
-              setItemJsonData({
-                username: '',
-                itemId: '',
-                itemName: '',
-                itemImage: '',
-                rating: '',
-                comment: ''
-              })
-          } else {
-            console.log(data.message)
-          }})
-          .catch((error) => {
-            console.log(error)
+        if (itemType === 'game') {
+          setItemJsonData({
+            ...itemJsonData,
+            Username: loggedUser.username,
+            ItemType: itemType,
+            ItemId: singleResult.id,
+            ItemName: singleResult.name,
+            ItemImage: singleResult.background_image 
           })
+        } else if (itemType === 'movie') {
+          setItemJsonData({
+            ...itemJsonData,
+            Username: loggedUser.username,
+            ItemType: itemType,
+            ItemId: singleResult.id,
+            ItemName: singleResult.title,
+            ItemImage: 'https://image.tmdb.org/t/p/w500' + singleResult.poster_path 
+          })
+        } else if (itemType === 'series') {
+          setItemJsonData({
+            ...itemJsonData,
+            Username: loggedUser.username,
+            ItemType: itemType,
+            ItemId: singleResult.id,
+            ItemName: singleResult.name,
+            ItemImage: 'https://image.tmdb.org/t/p/w500' + singleResult.poster_path 
+          })
+        } else if (itemType === 'music') {
+          setItemJsonData({
+            ...itemJsonData,
+            Username: loggedUser.username,
+            ItemType: itemType,
+            ItemId: singleResult.mbid,
+            ItemName: singleResult.name,
+            ItemImage: singleResult.image[3]['#text'] 
+          })
+        }
+        
       }
+
+      function closeItem() {
+        setIsItemOpen(false);
+    };
 
     return (
         <div className='searchMain'>
         <h2 className="searchTitle">Search new entity</h2>
+        
         <div className='search-bar'>
+        <select name="itemType" onChange={(e) => {setItemType(e.target.value); setSearchData([])}}> 
+          <option value="game">Game</option> 
+          <option value="movie">Movie</option> 
+          <option value="series">Series</option> 
+          <option value="music">Music album</option> 
+          <option value="book">Literature</option> 
+        </select>
             <input type="text" name="search" onChange={debouncedChange}></input>
         </div>
         {
@@ -106,39 +137,32 @@ function Search() {
             <div className='searchResults'>
               {
                 searchData.map((singleResult) => {
-                  return (
-                    <div 
-                    className="singleResult"
-                    key={singleResult.id}
-                    onClick={() =>
-                      singleResultView(singleResult)
-                    }
-                    > 
-                    {singleResult.name}
-                    </div>
-                  )
+                  if (singleResult.mbid !== '') {
+                    return (
+                      <div 
+                      className="singleResult"
+                      key={itemType === 'music' ? singleResult.mbid : singleResult.id}
+                      onClick={() =>
+                        singleResultView(singleResult)
+                      }
+                      > 
+                      {itemType === 'game' || itemType === 'series' || itemType === 'music' ? singleResult.name : singleResult.title}
+                      </div>
+                    )
+                  }
                 })
               }
             </div>
           ) 
         }
-        {
-          singleResult.name && (
-            <div className='selectedEntity'>
-              <img src={singleResult.background_image} width="250" height="250"/>
-              <div className="gameStats">
-              <h1>{singleResult.name}</h1>
-              <h2>Rating: {singleResult.rating}/5</h2>
-              <h2>Ratings count: {singleResult.ratings_count}</h2>
-              </div>
-              <label>Rating</label>
-              <input type="number" name="rating" style={{width: 45}} onChange={handleRating} value={itemJsonData.rating}></input>
-              <label>Comment</label>
-              <input type="text" name="comment" style={{width: 150}} maxLength={64} onChange={handleField}></input>
-              <button type="submit" onClick={handleCollecting}>Add to the collection</button>
-            </div>
-          )
-        }
+        <div>
+          <ItemModal
+            isItemOpen={isItemOpen}
+            itemInfo={itemJsonData}
+            onClose={closeItem}
+            isProfilePage={false}
+            />
+        </div>
       </div>
     );
 }

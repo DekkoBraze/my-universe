@@ -27,6 +27,8 @@ func main() {
 	subrouter.HandleFunc("/getUserItems/{username}", getUserItems).Methods("GET", "OPTIONS")
 	subrouter.HandleFunc("/deleteUserItem/{username}/{itemId}", deleteUserItem).Methods("DELETE", "OPTIONS")
 	subrouter.HandleFunc("/getRawgKey", rawgHandler).Methods("GET", "OPTIONS")
+	subrouter.HandleFunc("/getTmdbKey", tmdbHandler).Methods("GET", "OPTIONS")
+	subrouter.HandleFunc("/getLastfmKey", lastfmHandler).Methods("GET", "OPTIONS")
 	http.Handle("/", router)
 
 	err = http.ListenAndServe(":8000", nil)

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import "./ItemModal.css"
 
-function ItemModal ({ isItemOpen, itemInfo, onClose }) {
+function ItemModal ({ isItemOpen, itemInfo, onClose, isProfilePage }) {
     const [newRating, setNewRating] = useState('')
     const [newComment, setNewComment] = useState('')
 
@@ -28,6 +28,7 @@ function ItemModal ({ isItemOpen, itemInfo, onClose }) {
     function handleCollecting() {
       var itemJsonData = {
         ...itemInfo,
+        ItemId: String(itemInfo.ItemId),
         Rating: newRating,
         Comment: newComment
       }
@@ -65,7 +66,6 @@ function ItemModal ({ isItemOpen, itemInfo, onClose }) {
         .catch((error) => {
           console.log(error)
         }) 
-      onClose()
     }
 
     if (isItemOpen !== true) {
@@ -86,12 +86,21 @@ function ItemModal ({ isItemOpen, itemInfo, onClose }) {
                 </div>
                 <div className='inputComment'>
                   <label>Comment</label>
-                  <textarea type="text" name="comment" rows="4" maxLength={83} onChange={handleComment} value={newComment}></textarea>
+                  <textarea type="text" name="comment" rows="4" maxLength={83} onChange={handleComment} value={newComment || ''}></textarea>
                 </div>
               </div>
               <div className='buttons'>
-              <button type="submit" onClick={handleCollecting}>Change</button>
-              <button type="submit" onClick={handleDeletion}>Delete</button>
+              {isProfilePage ? (
+                <div>
+                  <button type="submit" onClick={handleCollecting}>Change</button>
+                  <button type="submit" onClick={handleDeletion}>Delete</button>
+                </div>
+              ) : (
+                <div>
+                  <button type="submit" onClick={handleCollecting}>Add</button>
+                </div>
+              )}
+              
               </div>
               </div>
             </div>

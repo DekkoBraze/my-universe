@@ -129,9 +129,27 @@ func getCurrentUser(w http.ResponseWriter, r *http.Request) {
 func rawgHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", reactUrl)
 	w.Header().Set("Content-Type", "application/json")
-	const rawgApiKey = "26ed1d032db149269419f1eadbf3d3f7"
 
+	const rawgApiKey = "26ed1d032db149269419f1eadbf3d3f7"
 	var response = Response{Message: rawgApiKey}
+	json.NewEncoder(w).Encode(response)
+}
+
+func tmdbHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", reactUrl)
+	w.Header().Set("Content-Type", "application/json")
+
+	const tmdbApiKey = "3e1ae42bc540ef6a25740c1638eed8fd"
+	var response = Response{Message: tmdbApiKey}
+	json.NewEncoder(w).Encode(response)
+}
+
+func lastfmHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", reactUrl)
+	w.Header().Set("Content-Type", "application/json")
+
+	const lastfmKey = "1babbce302adbb3994ecdafe3366694a"
+	var response = Response{Message: lastfmKey}
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -141,7 +159,8 @@ func addItem(w http.ResponseWriter, r *http.Request) {
 
 	type ItemData struct{
 		Username        			string	`json:"username"`
-		ItemId						int  	`json:"itemId"`
+		ItemType					string 	`json:"itemType"`
+		ItemId						string  `json:"itemId"`
 		ItemName					string 	`json:"itemName"`
 		ItemImage					string  `json:"itemImage"`
 		Rating						int		`json:"rating"`
@@ -156,7 +175,7 @@ func addItem(w http.ResponseWriter, r *http.Request) {
 		log.Print("addItem: ", err)
 	}
 
-	err = database.AddItem(data.Username, data.ItemId, data.ItemName, data.ItemImage, data.Rating, data.Comment)
+	err = database.AddItem(data.Username, data.ItemType, data.ItemId, data.ItemName, data.ItemImage, data.Rating, data.Comment)
 	if err != nil {
 		log.Print("addItem: ", err)
 		var response = Response{Message: err.Error()}

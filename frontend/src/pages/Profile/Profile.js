@@ -85,6 +85,7 @@ function Profile() {
                     isItemOpen={isItemOpen}
                     itemInfo={itemModalInfo}
                     onClose={closeItem}
+                    isProfilePage={true}
                     />
                 </div>
             </div>

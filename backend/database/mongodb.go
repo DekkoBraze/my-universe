@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"time"
-	//"log"
-	"strconv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -32,7 +30,8 @@ type User struct {
 type Item struct{
 	Username        		string		`bson:"username"`
 	CreatedAt      			time.Time 	`bson:"createdAt"`
-	ItemId					int  		`bson:"itemId"`
+	ItemType				string		`bson:"itemType"`
+	ItemId					string  	`bson:"itemId"`
 	ItemName				string 		`bson:"itemName"`
 	ItemImage				string		`bson:"itemImage"`
 	Rating					int			`bson:"rating"`
@@ -134,7 +133,7 @@ func GetProfileBySessionValue(value string) (bson.Raw, error) {
 	return result, nil
 }
 
-func AddItem(username string, itemId int, itemName string, itemImage string, rating int, comment string) error{
+func AddItem(username string, itemType string, itemId string, itemName string, itemImage string, rating int, comment string) error{
 	filter := bson.D{
 		{"$and",
 			bson.A{
@@ -143,13 +142,13 @@ func AddItem(username string, itemId int, itemName string, itemImage string, rat
 			},
 		},
 	}
-	
 	cursor := items.FindOne(ctx, filter)
 	_, err := cursor.Raw()
 	if err == mongo.ErrNoDocuments {
 		newItem := Item{
 			Username:   	username,
 			CreatedAt:      time.Now(),
+			ItemType:		itemType,
 			ItemId: 		itemId,
 			ItemName: 		itemName,
 			ItemImage:  	itemImage,
@@ -189,20 +188,16 @@ func GetUserItems(username string) ([]Item, error){
 }
 
 func DeleteUserItem(username string, itemId string) error{
-	itemIdInt, err := strconv.Atoi(itemId)
-	if err != nil {
-		return err
-	}
 	filter := bson.D{
 		{"$and",
 			bson.A{
 				bson.D{{"username", username}},
-				bson.D{{"itemId", itemIdInt}},
+				bson.D{{"itemId", itemId}},
 			},
 		},
 	}
 
-	_, err = items.DeleteOne(ctx, filter)
+	_, err := items.DeleteOne(ctx, filter)
 	if err != nil {
 		return err
 	}

@@ -1,6 +1,12 @@
 .search-bar {
     font-size: 20px;
-    margin-left: 11.5%;
+    text-align: center;
+}
+
+select {
+    margin-right: -320px;
+    margin-top: 10px;
+    height: 25px;
 }
 
 .searchTitle {
@@ -9,42 +15,20 @@
 
 .searchResults
 {
-    margin-left: 28.5%;
-    width: 43%;
+    margin-left: 488px;
+    width: 905px;
+    height: 500px;
     background-color: white;
     overflow: scroll;
     height: 350px;
-    z-index: 100;
 }
 
 .singleResult
 {
-    width: 90%;
     height: 40px;
     font-size: 16px;
     padding: 0 10px;
     font-family: sans-serif;
     color: black;
-    align-items: center;
     cursor: pointer;
-}
-
-.selectedEntity {
-    text-align: center;
-    margin-top: 3rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.gameStats {
-    margin: -5px;
-}
-
-.selectedEntity label {
-    margin: 5px;
-}
-
-.selectedEntity button {
-    margin-top: 1rem;
 }
