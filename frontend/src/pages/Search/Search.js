@@ -152,7 +152,7 @@ function Search() {
     return (
         <div className='searchMain'>
         <h2 className="searchTitle">Search new item</h2>
-        
+        <div className="searchDiv">
         <div className='search-bar'>
         <select name="itemType" onChange={(e) => {setItemType(e.target.value); setSearchData([])}}> 
           <option value="game">Game</option> 
@@ -168,8 +168,9 @@ function Search() {
             <div className='searchResults'>
               {
                 searchData.map((singleResult) => {
-                  if (itemType === 'movie' && singleResult.mbid !== '' || itemType === 'book' && singleResult.isbn !== undefined) {
-                    console.log(singleResult)
+                  if (itemType === 'movie' && singleResult.mbid !== '' || 
+                  itemType === 'book' && singleResult.isbn !== undefined ||
+                  itemType === 'game' || itemType === 'series' || itemType === 'music') {
                     const [keyNum, name] = searchFields(singleResult)
                     return (
                       <div 
@@ -188,6 +189,7 @@ function Search() {
             </div>
           ) 
         }
+        </div>
         <div>
           <ItemModal
             isItemOpen={isItemOpen}
