@@ -53,6 +53,11 @@ label {
     margin-right: -9rem;
 }
 
+.inputRating h3 {
+    margin-left: 10rem;
+    margin-right: -9rem;
+}
+
 textarea {
     resize: none;
 }

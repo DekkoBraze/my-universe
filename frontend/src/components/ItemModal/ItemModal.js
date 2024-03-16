@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import "./ItemModal.css"
 
-function ItemModal ({ isItemOpen, itemInfo, onClose, isProfilePage }) {
+function ItemModal ({ isItemOpen, itemInfo, onClose, isProfilePage, isUsersPage }) {
     const [newRating, setNewRating] = useState('')
     const [newComment, setNewComment] = useState('')
 
@@ -79,18 +79,31 @@ function ItemModal ({ isItemOpen, itemInfo, onClose, isProfilePage }) {
               <div className='content'>
               <img className='itemImage' src={itemInfo.ItemImage} width="250" height="250"/>
               <h1 className='itemName'>{itemInfo.ItemName}</h1>
-              <div className='inputs'>
-                <div className='inputRating'>
+                {isUsersPage ? (
+                  <div className='inputs'>
+                  <div className='inputRating'>
                   <label>Rating</label>
                   <input type="number" name="rating" style={{width: 45}} onChange={handleRating} value={newRating || ''}></input>
-                </div>
-                <div className='inputComment'>
+                  </div>
+                  <div className='inputComment'>
                   <label>Comment</label>
                   <textarea type="text" name="comment" rows="4" maxLength={83} onChange={handleComment} value={newComment || ''}></textarea>
-                </div>
-              </div>
+                  </div>
+                  </div>
+                ) : (
+                  <div className='inputs'>
+                    <div className='inputRating'>
+                  <label>Rating</label>
+                  <h3 name="rating" style={{width: 45}}>{newRating}</h3>
+                  </div>
+                  <div className='inputComment'>
+                  <label>Comment</label>
+                  <h3 name="comment" style={{width: 200, wordWrap: 'break-word'}}>{newComment}</h3>
+                  </div>
+                  </div>
+                )}
               <div className='buttons'>
-              {isProfilePage ? (
+              {isUsersPage ? (isProfilePage ? (
                 <div>
                   <button type="submit" onClick={handleCollecting}>Change</button>
                   <button type="submit" onClick={handleDeletion}>Delete</button>
@@ -99,8 +112,8 @@ function ItemModal ({ isItemOpen, itemInfo, onClose, isProfilePage }) {
                 <div>
                   <button type="submit" onClick={handleCollecting}>Add</button>
                 </div>
-              )}
-              
+              )) : (<div></div>)
+              }
               </div>
               </div>
             </div>

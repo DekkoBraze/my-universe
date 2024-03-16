@@ -1,9 +1,8 @@
 .profileInfo {
-    font-size: 20;
     padding-left: 2rem;
     padding-top: 2rem;
     padding-bottom: 1rem;
-    width: 17.5rem;
+    width: 19.5rem;
     background-color:darkslategrey;
 }
 
@@ -11,13 +10,20 @@
     text-align: center;
 }
 
-.searchLink {
-    text-decoration: none;
-    color:white;
+.searchButton {
     font-size: 30px;
-    margin-left: 90%;
+    margin-left: 45%;
+}
+
+.allItems {
+    display: grid;
+    grid-template-columns: repeat(14, 7.13%);
+    margin-top: 10px;
+    background-color: red;
 }
 
 .item {
     float: right;
+    background-color: aquamarine;
+    margin: 1px;
 }

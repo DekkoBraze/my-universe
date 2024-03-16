@@ -71,6 +71,7 @@ function Search() {
             )
             .then(response => response.json())
             .then(data => {
+              console.log(data)
               setSearchData(data.docs)
             })
             .catch(error => console.error(error));
@@ -149,7 +150,8 @@ function Search() {
       }
     }
 
-    return (
+    if (loggedUser) {
+      return (
         <div className='searchMain'>
         <h2 className="searchTitle">Search new item</h2>
         <div className="searchDiv">
@@ -196,10 +198,17 @@ function Search() {
             itemInfo={itemJsonData}
             onClose={closeItem}
             isProfilePage={false}
+            isUsersPage={true}
             />
         </div>
       </div>
     );
+    } else {
+      return (
+      <h1 className='searchTitle'>You need to login into account to use this page.</h1>
+      )
+    }
+    
 }
 
 export default Search;

@@ -41,6 +41,10 @@ function Profile() {
         setIsItemOpen(false);
     };
 
+    function toSearch() {
+        window.location.replace('/search');
+    }
+
     if(requestCompleted)
     {   
         if(!profileData.username) { return <NotFound /> }
@@ -55,6 +59,7 @@ function Profile() {
                     <h3>{profileData.status}</h3>
                     <h3>{profileData.description}</h3>
                 </div>
+                <div className='allItems'>
                 {
                     userItems && (
                     userItems.map((item) => {
@@ -75,10 +80,12 @@ function Profile() {
                         )
                     }))
                 }
-                {
-                    loggedUser && loggedUser.username === profileData.username && (
-                        <Link className='searchLink' to="/search/">Add items</Link>
-                    )
+                </div>
+                {  
+                loggedUser && loggedUser.username === profileData.username && (
+                    <button className='searchButton' onClick={toSearch}>Add items</button>
+                )   
+   
                 }
                 <div>
                     <ItemModal
@@ -86,6 +93,7 @@ function Profile() {
                     itemInfo={itemModalInfo}
                     onClose={closeItem}
                     isProfilePage={true}
+                    isUsersPage={loggedUser && username === loggedUser.username ? true : false}
                     />
                 </div>
             </div>
